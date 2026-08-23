@@ -70,4 +70,67 @@ router.get('/reports', async (req, res) => {
   }
 });
 
+router.get('/charts', async (req, res) => {
+  try {
+    const Order = require('../models/Order');
+    const Product = require('../models/Product');
+    const Category = require('../models/Category');
+    const Payment = require('../models/Payment');
+
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1);
+
+    // 1 & 2. Monthly Orders and Revenue
+    const monthlyOrders = Array(12).fill(0);
+    const monthlyRevenue = Array(12).fill(0);
+
+    const ordersThisYear = await Order.find({ createdAt: { $gte: startOfYear } }, { createdAt: 1 });
+    ordersThisYear.forEach(order => {
+      const month = new Date(order.createdAt).getMonth();
+      monthlyOrders[month] += 1;
+    });
+
+    const paymentsThisYear = await Payment.find({ createdAt: { $gte: startOfYear } }, { amount: 1, createdAt: 1 }).lean();
+    let totalYearRevenue = 0;
+    paymentsThisYear.forEach(p => {
+      const amt = parseFloat(String(p.amount || '0').replace(/[^0-9.]/g, '')) || 0;
+      const month = new Date(p.createdAt).getMonth();
+      monthlyRevenue[month] += amt;
+      totalYearRevenue += amt;
+    });
+
+    // 3. Product Category Distribution
+    const categories = await Category.find({}, { name: 1 }).lean();
+    const catMap = {};
+    categories.forEach(c => catMap[c._id] = c.name);
+
+    const productCatStats = await Product.aggregate([
+      { $group: { _id: "$category", count: { $sum: 1 } } }
+    ]);
+
+    const categoryDistribution = productCatStats.map(stat => {
+      return [catMap[stat._id] || 'Unknown', stat.count];
+    }).sort((a, b) => b[1] - a[1]).slice(0, 5); // top 5
+
+    // 4. Order Fulfillment Status
+    const statusStats = await Order.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]);
+
+    const fulfillmentDistribution = statusStats.map(stat => {
+      return [stat._id || 'Pending', stat.count];
+    });
+
+    res.json({
+      monthlyOrders,
+      monthlyRevenue,
+      totalYearRevenue,
+      categoryDistribution: categoryDistribution.length ? categoryDistribution : [['No Data', 1]],
+      fulfillmentDistribution: fulfillmentDistribution.length ? fulfillmentDistribution : [['No Data', 1]]
+    });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
 module.exports = router;
