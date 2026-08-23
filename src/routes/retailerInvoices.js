@@ -24,7 +24,7 @@ router.put('/:id', async (req, res, next) => {
         // Fetch the vendor to get their commission percentage
         const vendor = await Vendor.findById(vId);
         if (vendor) {
-          const commPercent = parseFloat(vendor.commission) || 0;
+          const commPercent = parseFloat(vendor.amount || vendor.commission) || 0;
           const invAmt = parseFloat(invoice.total) || 0;
           
           // Calculate payout amount

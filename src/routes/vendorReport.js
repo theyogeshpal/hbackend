@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
         vendorName: vendor.vendorName,
         totalInvoices: vendorPayouts.length,
         totalInvoiceAmount: totalInvoiceAmount.toFixed(2),
-        totalCommission: vendor.commission || '0', // The vendor's standard commission rate
+        totalCommission: vendor.amount || vendor.commission || '0', // The vendor's standard commission rate / amount
         totalPayout: totalPayout.toFixed(2),
         released: released.toFixed(2),
         pending: pending.toFixed(2)

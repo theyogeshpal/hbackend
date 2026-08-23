@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const schema = new mongoose.Schema({
   vendorName: { type: String, required: true },
+  amount: String,
   commission: String,
   email: String,
   phone: String,

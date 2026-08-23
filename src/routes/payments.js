@@ -28,7 +28,7 @@ router.put('/:id', async (req, res, next) => {
           if (invoice.vendorId) {
             const vendor = await Vendor.findById(invoice.vendorId);
             if (vendor) {
-              const commPercent = parseFloat(vendor.commission) || 0;
+              const commPercent = parseFloat(vendor.amount || vendor.commission) || 0;
               const invAmt = parseFloat(invoice.total) || 0;
               const payoutAmt = (invAmt * commPercent) / 100;
 
