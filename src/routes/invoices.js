@@ -28,7 +28,7 @@ router.put('/:id', async (req, res, next) => {
         
         let payoutStatus = 'Pending';
         // If invoice is becoming Paid, or is already Paid, payout becomes Hold (ready for release)
-        if (status === 'Paid' || invoice.status === 'Paid') {
+        if (status === 'Paid' || status === 'Full Paid' || invoice.status === 'Paid' || invoice.status === 'Full Paid') {
           payoutStatus = 'Hold';
         }
 

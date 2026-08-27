@@ -7,7 +7,43 @@ const router = express.Router();
 
 router.put('/:id', async (req, res, next) => {
   try {
-    const { status } = req.body;
+    const { status, installments, products } = req.body;
+    
+    // Auto-update Invoice status based on installments or order cancellation
+    if (installments !== undefined || status === 'Cancelled' || products !== undefined) {
+      const order = await Order.findById(req.params.id);
+      if (order) {
+        const Invoice = require('../models/Invoice');
+        const invoice = await Invoice.findOne({ orderNo: order.orderNo });
+        
+        if (invoice) {
+          const prodList = products || order.products || [];
+          const instList = installments || order.installments || [];
+          
+          let totalAmount = prodList.reduce((sum, p) => sum + ((parseFloat(p.quantity)||0) * (parseFloat(p.price)||0)), 0);
+          let paidAmount = instList.reduce((sum, inst) => inst.status === 'Paid' ? sum + (parseFloat(inst.amount)||0) : sum, 0);
+          
+          let newInvStatus = invoice.status;
+          const currentStatus = status || order.status;
+          
+          if (currentStatus === 'Cancelled') {
+            newInvStatus = 'Cancelled';
+          } else if (paidAmount === 0) {
+            newInvStatus = 'Pending';
+          } else if (paidAmount > 0 && paidAmount < totalAmount) {
+            newInvStatus = 'Partial Paid';
+          } else if (paidAmount > 0 && paidAmount >= totalAmount) {
+            newInvStatus = 'Full Paid';
+          }
+          
+          if (newInvStatus !== invoice.status) {
+            invoice.status = newInvStatus;
+            await invoice.save();
+          }
+        }
+      }
+    }
+
     if (status === 'Shipped') {
       const order = await Order.findById(req.params.id);
       if (order) {
