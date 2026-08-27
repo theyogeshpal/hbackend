@@ -48,6 +48,8 @@ router.put('/:id', async (req, res) => {
         customer: existing.customer,
         country: existing.country,
         address: req.body.address || existing.address || '',
+        incoterm: req.body.incoterm || existing.incoterm || '',
+        deliveryPort: req.body.deliveryPort || existing.deliveryPort || '',
         products: [{
           name: existing.product || '',
           quantity: existing.qty || '',
