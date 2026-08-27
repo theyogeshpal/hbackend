@@ -9,7 +9,8 @@ const schema = new mongoose.Schema({
   balancePaidInr: { type: Number, default: 0 },
   status: { type: String, enum: ['Pending', 'Production Started', 'Completed', 'Goods Received'], default: 'Pending' },
   expectedDeliveryDate: Date,
-  notes: { type: String, default: '' }
+  notes: { type: String, default: '' },
+  installments: { type: Array, default: [] }
 }, { timestamps: true });
 
 module.exports = mongoose.model('VendorOrder', schema);
