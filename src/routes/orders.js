@@ -36,8 +36,16 @@ router.put('/:id', async (req, res, next) => {
             newInvStatus = 'Full Paid';
           }
           
-          if (newInvStatus !== invoice.status) {
-            invoice.status = newInvStatus;
+          let isChanged = false;
+          if (newInvStatus !== invoice.status) { 
+            invoice.status = newInvStatus; 
+            isChanged = true; 
+          }
+          if (totalAmount.toString() !== invoice.total) { 
+            invoice.total = totalAmount.toString(); 
+            isChanged = true; 
+          }
+          if (isChanged) {
             await invoice.save();
           }
         }
