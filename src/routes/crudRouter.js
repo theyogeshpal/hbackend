@@ -6,7 +6,11 @@ const crudRouter = (Model) => {
 
   router.get('/', async (req, res) => {
     try {
-      const docs = await Model.find().sort({ createdAt: -1 }).lean();
+      let query = Model.find().sort({ createdAt: -1 });
+      if (Model.schema.paths.vendorId) {
+        query = query.populate('vendorId', 'vendorName');
+      }
+      const docs = await query.lean();
       res.json(docs);
     } catch (e) { res.status(500).json({ message: e.message }); }
   });
