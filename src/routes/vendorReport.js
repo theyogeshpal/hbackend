@@ -50,4 +50,21 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+router.post('/bulk-delete', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) return res.status(400).json({ message: 'Invalid IDs' });
+    
+    // Delete the vendors and their payouts
+    await Vendor.deleteMany({ _id: { $in: ids } });
+    await VendorPayout.deleteMany({ vendorId: { $in: ids } });
+    
+    res.json({ message: 'Deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
+
