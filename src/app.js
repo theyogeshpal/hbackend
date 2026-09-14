@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // Add cache control for static files to improve load times
-const staticOptions = { maxAge: '7d' };
+const staticOptions = { maxAge: '30d', immutable: true };
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), staticOptions));
 app.use('/api/uploads', express.static(path.join(__dirname, '../uploads'), staticOptions));
 app.use('/api-v1/uploads', express.static(path.join(__dirname, '../uploads'), staticOptions));
@@ -47,6 +47,7 @@ app.use('/api/certifications', require('./routes/certifications'));
 app.use('/api/sliders', require('./routes/sliders'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/service-inquiries', require('./routes/serviceInquiries'));
+app.use('/api/quick-inquiries', require('./routes/quickInquiries'));
 app.use('/api/download-leads', require('./routes/downloadLeads'));
 app.use('/api/vendors', require('./routes/vendors'));
 app.use('/api/vendor-payouts', require('./routes/vendorPayouts'));
