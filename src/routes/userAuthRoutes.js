@@ -147,8 +147,9 @@ router.post('/quotations/:id/accept', userAuth, async (req, res) => {
     await Notification.create({
       title: 'Quotation Accepted',
       message: 'User ' + req.user.name + ' accepted Quotation #' + (quotation.quoteNo || quotation._id),
-      type: 'quotation',
-      read: false
+      modelName: 'Order',
+        link: '/admin/inquiry-system/orders',
+      isRead: false
     });
     // Create Order
     await Order.create({
