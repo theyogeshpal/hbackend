@@ -134,7 +134,9 @@ router.post('/quotations/:id/accept', userAuth, async (req, res) => {
     const Inquiry = require('../models/Inquiry');
     const Notification = require('../models/Notification');
     const Order = require('../models/Order');
-    const quotation = await Quotation.findOne({ _id: req.params.id, userId: req.user.id });
+    const inquiries = await Inquiry.find({ userId: req.user.id }).lean();
+      const inquiryIds = inquiries.map(i => i._id.toString());
+      const quotation = await Quotation.findOne({ _id: req.params.id, $or: [{ userId: req.user.id }, { inquiryId: { $in: inquiryIds } }] });
     if (!quotation) return res.status(404).json({ message: 'Quotation not found' });
     quotation.status = 'Accepted';
     await quotation.save();
