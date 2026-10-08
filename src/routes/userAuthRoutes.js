@@ -153,15 +153,23 @@ router.post('/quotations/:id/accept', userAuth, async (req, res) => {
     });
     // Create Order
     await Order.create({
-      userId: req.user.id,
-      quotationId: quotation._id,
-      orderNo: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
-      customerName: quotation.customer,
-      email: quotation.customerEmail,
-      product: quotation.product,
-      totalAmount: quotation.total,
-      status: 'Pending'
-    });
+        userId: req.user.id,
+        quotation: quotation.quoteNo || quotation._id.toString(),
+        orderNo: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+        customer: quotation.customer || req.user.name,
+        country: quotation.country || '',
+        address: quotation.address || '',
+        incoterm: quotation.incoterm || '',
+        deliveryPort: quotation.deliveryPort || '',
+        products: [{
+          name: quotation.product || '',
+          quantity: quotation.qty || '',
+          price: quotation.rate || ''
+        }],
+        type: quotation.type || 'inquiry',
+        totalAmount: quotation.total,
+        status: 'Pending'
+      });
     res.json({ message: 'Quotation accepted and order placed successfully' });
   } catch (error) { res.status(500).json({ message: error.message }); }
 });
