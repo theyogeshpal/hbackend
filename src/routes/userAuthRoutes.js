@@ -91,4 +91,26 @@ router.get('/me', userAuth, async (req, res) => {
   }
 });
 
+// Toggle Wishlist
+router.post('/wishlist/toggle', userAuth, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const index = user.wishlist.indexOf(productId);
+    if (index === -1) { user.wishlist.push(productId); } else { user.wishlist.splice(index, 1); }
+    await user.save();
+    res.json(user.wishlist);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+});
+
+// Get Wishlist Details
+router.get('/wishlist', userAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate('wishlist');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user.wishlist);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+});
+
 module.exports = router;
