@@ -83,7 +83,7 @@ router.post('/login', async (req, res) => {
 // Get Current User Profile
 router.get('/me', userAuth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user.id).select('-password').populate('wishlist');
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
   } catch (error) {
@@ -110,6 +110,62 @@ router.get('/wishlist', userAuth, async (req, res) => {
     const user = await User.findById(req.user.id).populate('wishlist');
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user.wishlist);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+});
+
+// Get User Inquiries
+router.get('/inquiries', userAuth, async (req, res) => {
+  try {
+    const Inquiry = require('../models/Inquiry');
+    const Quotation = require('../models/Quotation');
+    const inquiries = await Inquiry.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const quotations = await Quotation.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    res.json({ inquiries, quotations });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+});
+
+// Accept Quotation
+router.post('/quotations/:id/accept', userAuth, async (req, res) => {
+  try {
+    const Quotation = require('../models/Quotation');
+    const Inquiry = require('../models/Inquiry');
+    const Notification = require('../models/Notification');
+    const Order = require('../models/Order');
+    const quotation = await Quotation.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!quotation) return res.status(404).json({ message: 'Quotation not found' });
+    quotation.status = 'Accepted';
+    await quotation.save();
+    if (quotation.inquiryId) {
+      await Inquiry.findByIdAndUpdate(quotation.inquiryId, { status: 'Accepted' });
+    }
+    // Create Notification for Admin
+    await Notification.create({
+      title: 'Quotation Accepted',
+      message: \User \ accepted Quotation #\\,
+      type: 'quotation',
+      read: false
+    });
+    // Create Order
+    await Order.create({
+      userId: req.user.id,
+      quotationId: quotation._id,
+      orderNo: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+      customerName: quotation.customer,
+      email: quotation.customerEmail,
+      product: quotation.product,
+      totalAmount: quotation.total,
+      status: 'Pending'
+    });
+    res.json({ message: 'Quotation accepted and order placed successfully' });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+});
+
+// Get User Orders
+router.get('/orders', userAuth, async (req, res) => {
+  try {
+    const Order = require('../models/Order');
+    const orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    res.json(orders);
   } catch (error) { res.status(500).json({ message: error.message }); }
 });
 

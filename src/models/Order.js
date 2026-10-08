@@ -11,6 +11,8 @@ const schema = new mongoose.Schema({
   paymentTerms: { type: String, default: '' },
   deliveryPort: { type: String, default: '' },
   type: { type: String, enum: ['inquiry', 'retailer'], default: 'inquiry' },
-  installments: { type: Array, default: [] }
+  installments: { type: Array, default: [] },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  totalAmount: String
 }, { timestamps: true });
 module.exports = mongoose.model('Order', schema);
