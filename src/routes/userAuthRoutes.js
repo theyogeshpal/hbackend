@@ -141,7 +141,7 @@ router.post('/quotations/:id/accept', userAuth, async (req, res) => {
     // Create Notification for Admin
     await Notification.create({
       title: 'Quotation Accepted',
-      message: \User \ accepted Quotation #\\,
+      message: 'User ' + req.user.name + ' accepted Quotation #' + (quotation.quoteNo || quotation._id),
       type: 'quotation',
       read: false
     });
