@@ -17,6 +17,8 @@ const schema = new mongoose.Schema({
   deliveryDate: String,
   quotationId: String,
   quoteNo: String,
-  type: { type: String, enum: ['inquiry', 'retailer'], default: 'inquiry' }
+  type: { type: String, enum: ['inquiry', 'retailer'], default: 'inquiry' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  status: { type: String, enum: ['Pending', 'Quotation Created', 'Accepted', 'Rejected'], default: 'Pending' }
 }, { timestamps: true });
 module.exports = mongoose.model('Inquiry', schema);

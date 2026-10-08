@@ -20,6 +20,7 @@ const schema = new mongoose.Schema({
   paymentTerms: { type: String, default: '' },
   deliveryPort: { type: String, default: '' },
   status: { type: String, default: 'Sent' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   type: { type: String, enum: ['inquiry', 'retailer'], default: 'inquiry' }
 }, { timestamps: true });
 module.exports = mongoose.model('Quotation', schema);
