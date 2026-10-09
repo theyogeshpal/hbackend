@@ -42,6 +42,9 @@ const crudRouter = (Model) => {
             const productInfo = req.body.productName || req.body.product || 'a product';
             message = `Inquiry from ${name} for ${productInfo}.`;
             link = '/admin/inquiry-system/product-inquiries';
+            // Send Email
+            const { sendEnquiryEmail } = require('../utils/mailer');
+            sendEnquiryEmail(req.body);
           } else if (Model.modelName === 'Contact') {
             title = 'New Contact Message';
             message = `Contact message received from ${name}.`;
