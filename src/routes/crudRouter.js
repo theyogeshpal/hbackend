@@ -73,12 +73,31 @@ const crudRouter = (Model) => {
             link = '/admin/download-leads';
           }
           
+          
           await Notification.create({
             modelName: Model.modelName,
             title,
             message,
             link
           });
+          
+          // Auto-create user account if email provided
+          if (req.body.email) {
+            const User = require('../models/User');
+            let existingUser = await User.findOne({ email: req.body.email });
+            if (!existingUser) {
+              existingUser = await User.create({
+                email: req.body.email,
+                name: req.body.name || req.body.customer || req.body.customerName || 'User',
+                phone: req.body.phone || ''
+              });
+            }
+            if (Model.modelName === 'Inquiry') {
+              doc.userId = existingUser._id;
+              await doc.save();
+            }
+          }
+
         } catch (notifErr) {
           console.error('Failed to create notification:', notifErr);
         }
