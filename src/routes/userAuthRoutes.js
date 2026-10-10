@@ -193,11 +193,9 @@ router.get('/inquiries', userAuth, async (req, res) => {
   try {
     const Inquiry = require('../models/Inquiry');
     const Quotation = require('../models/Quotation');
-    const inquiries = await Inquiry.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const inquiries = await Inquiry.find({ $or: [{ userId: req.user.id }, { email: req.user.email }] }).sort({ createdAt: -1 });
     const inquiryIds = inquiries.map(i => i._id.toString());
-    const quotations = await Quotation.find({
-      $or: [{ userId: req.user.id }, { inquiryId: { $in: inquiryIds } }]
-    }).sort({ createdAt: -1 });
+    const quotations = await Quotation.find({ $or: [{ userId: req.user.id }, { email: req.user.email }, { inquiryId: { $in: inquiryIds } }] }).sort({ createdAt: -1 });
     res.json({ inquiries, quotations });
   } catch (error) { res.status(500).json({ message: error.message }); }
 });
