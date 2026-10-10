@@ -5,6 +5,81 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const userAuth = require('../middleware/userAuth');
 
+
+// Send OTP
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({ email, name: req.body.name || 'User', otp, otpExpiry });
+    } else {
+      user.otp = otp;
+      user.otpExpiry = otpExpiry;
+      await user.save();
+    }
+
+    const transporter = require('nodemailer').createTransport({
+      service: 'gmail',
+      auth: { user: 'indiaexport@hieil.com', pass: 'vyrp suzu teun movv' }
+    });
+    
+    await transporter.sendMail({
+      from: 'indiaexport@hieil.com',
+      to: email,
+      subject: 'Your Login OTP - HIEIL',
+      text: `Your OTP is ${otp}. It is valid for 10 minutes.`
+    });
+
+    res.json({ message: 'OTP sent successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Verify OTP
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp, name, phone, companyName } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (!user || user.otp !== otp || user.otpExpiry < new Date()) {
+      return res.status(401).json({ message: 'Invalid or expired OTP' });
+    }
+
+    if (name && user.name === 'User') user.name = name;
+    if (phone) user.phone = phone;
+    if (companyName) user.companyName = companyName;
+    
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({ 
+      token, 
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Register User
 router.post('/register', async (req, res) => {
   try {
