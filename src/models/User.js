@@ -19,4 +19,10 @@ const userSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+
+User.init().then(() => {
+  User.collection.dropIndex('mobile_1').catch(() => {});
+});
+
+module.exports = User;
