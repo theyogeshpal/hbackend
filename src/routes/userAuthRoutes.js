@@ -256,4 +256,17 @@ router.get('/orders', userAuth, async (req, res) => {
   } catch (error) { res.status(500).json({ message: error.message }); }
 });
 
+// Get User Memberships / Subscriptions
+router.get('/memberships', userAuth, async (req, res) => {
+  try {
+    const SubscriptionEnquiry = require('../models/SubscriptionEnquiry');
+    const memberships = await SubscriptionEnquiry.find({
+      $or: [{ userId: req.user.id }, { email: req.user.email }]
+    }).sort({ createdAt: -1 });
+    res.json(memberships);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

@@ -80,6 +80,8 @@ app.use('/api/settings', require('./routes/settings'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/vendor-orders', require('./routes/vendorOrders'));
 app.use('/api/domestic-logistics', require('./routes/domesticLogistics'));
+app.use('/api/subscription-plans', require('./routes/subscriptionPlans'));
+app.use('/api/subscription-enquiries', require('./routes/subscriptionEnquiries'));
 
 // Seed Route
 app.post('/api/trigger-seed', async (req, res) => {
