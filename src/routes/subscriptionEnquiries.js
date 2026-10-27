@@ -36,18 +36,32 @@ router.get('/:id', async (req, res) => {
 // CREATE enquiry (from frontend website)
 router.post('/', async (req, res) => {
   try {
-    const doc = await SubscriptionEnquiry.create(req.body);
+    const data = { ...req.body };
+    if (!data.name && data.email) {
+      data.name = data.email.split('@')[0];
+    }
+    if (!data.planId || data.planId === 'null' || data.planId === '') {
+      data.planId = null;
+    }
+    if (!data.planName) {
+      data.planName = '';
+    }
+
+    const doc = await SubscriptionEnquiry.create(data);
 
     // Auto-create user account if email provided or link to existing
-    if (req.body.email) {
+    if (data.email) {
       try {
-        let existingUser = await User.findOne({ email: req.body.email });
+        const cleanEmail = data.email.toLowerCase().trim();
+        let existingUser = await User.findOne({
+          email: { $regex: new RegExp(`^${cleanEmail}$`, 'i') }
+        });
         if (!existingUser) {
           existingUser = await User.create({
-            email: req.body.email,
-            name: req.body.name || 'User',
-            phone: req.body.phone || '',
-            companyName: req.body.companyName || ''
+            email: cleanEmail,
+            name: data.name || cleanEmail.split('@')[0],
+            phone: data.phone || '',
+            companyName: data.companyName || ''
           });
         }
         doc.userId = existingUser._id;
@@ -59,10 +73,11 @@ router.post('/', async (req, res) => {
 
     // Create Notification for admin
     try {
+      const planTitle = data.planName ? data.planName : 'General Sourcing Consultation';
       await Notification.create({
         modelName: 'SubscriptionEnquiry',
-        title: 'New Membership Enquiry',
-        message: `${req.body.name || 'A customer'} enquired about ${req.body.planName || 'Membership'}.`,
+        title: 'New Subscription Enquiry',
+        message: `${data.name || 'A customer'} (${data.email}) enquired about ${planTitle}.`,
         link: '/admin/membership-enquiries'
       });
     } catch (notifErr) {
@@ -72,11 +87,11 @@ router.post('/', async (req, res) => {
     // Send email notification to admin
     try {
       sendEnquiryEmail({
-        customer: req.body.name,
-        email: req.body.email,
-        phone: req.body.phone,
-        product: `Membership: ${req.body.planName || 'Plan'} (${req.body.duration || ''} - ${req.body.price || ''})`,
-        message: `Company: ${req.body.companyName || 'N/A'}\nCategories: ${req.body.productCategories || 'N/A'}\nTarget Market: ${req.body.targetMarket || 'N/A'}\nExpected Order Size: ${req.body.expectedOrderSize || 'N/A'}\nMessage: ${req.body.message || 'N/A'}`
+        customer: data.name || data.email,
+        email: data.email,
+        phone: data.phone,
+        product: data.planName ? `Subscription: ${data.planName} (${data.duration || ''} - ${data.price || ''})` : 'General Sourcing Consultation (No Specific Plan)',
+        message: `Plan: ${data.planName || 'No Product / General Consultation'}\nCompany: ${data.companyName || 'N/A'}\nCategories: ${data.productCategories || 'N/A'}\nTarget Market: ${data.targetMarket || 'N/A'}\nExpected Order Size: ${data.expectedOrderSize || 'N/A'}\nMessage: ${data.message || 'Direct inquiry from website'}`
       });
     } catch (mailErr) {
       console.error('Failed to send enquiry email:', mailErr);

@@ -260,9 +260,13 @@ router.get('/orders', userAuth, async (req, res) => {
 router.get('/memberships', userAuth, async (req, res) => {
   try {
     const SubscriptionEnquiry = require('../models/SubscriptionEnquiry');
+    const userEmail = (req.user.email || '').toLowerCase().trim();
     const memberships = await SubscriptionEnquiry.find({
-      $or: [{ userId: req.user.id }, { email: req.user.email }]
-    }).sort({ createdAt: -1 });
+      $or: [
+        { userId: req.user.id },
+        { email: { $regex: new RegExp(`^${userEmail}$`, 'i') } }
+      ]
+    }).populate('planId', 'name price duration').sort({ createdAt: -1 });
     res.json(memberships);
   } catch (error) {
     res.status(500).json({ message: error.message });
