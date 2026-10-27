@@ -5,6 +5,7 @@ const subscriptionPlanSchema = new mongoose.Schema({
   duration: { type: String, required: true }, // e.g. "3 months", "6 months", "12 months"
   price: { type: String, required: true }, // e.g. "$1,499"
   originalPrice: { type: String }, // e.g. "$1,799" (for discount/strikethrough)
+  perDayCost: { type: String }, // e.g. "$16.65 / day"
   offerBadge: { type: String }, // e.g. "Save $300" or "Launch Offer"
   targetAudience: { type: String }, // e.g. "For new importers, independent retailers..."
   features: { type: [String], default: [] }, // Array of feature bullet points

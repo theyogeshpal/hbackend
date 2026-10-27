@@ -8,6 +8,7 @@ const defaultPlans = [
     duration: '3 months',
     price: '$1,499',
     originalPrice: '$1,799',
+    perDayCost: '$16.65 / day',
     offerBadge: 'Save $300',
     targetAudience: 'For new importers, independent retailers and boutique businesses.',
     features: [
@@ -31,6 +32,7 @@ const defaultPlans = [
     duration: '6 months',
     price: '$2,499',
     originalPrice: '$2,999',
+    perDayCost: '$13.88 / day',
     offerBadge: 'Save $500',
     targetAudience: 'For growing retailers, importers and gift businesses.',
     extraHeader: 'Everything in Essential, plus',
@@ -56,6 +58,7 @@ const defaultPlans = [
     duration: '12 months',
     price: '$3,999',
     originalPrice: '$4,999',
+    perDayCost: '$10.95 / day',
     offerBadge: 'Save $1,000',
     targetAudience: 'For wholesalers, established importers and multi-store retailers.',
     extraHeader: 'Everything in Business, plus',
