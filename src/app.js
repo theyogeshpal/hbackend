@@ -82,6 +82,7 @@ app.use('/api/vendor-orders', require('./routes/vendorOrders'));
 app.use('/api/domestic-logistics', require('./routes/domesticLogistics'));
 app.use('/api/subscription-plans', require('./routes/subscriptionPlans'));
 app.use('/api/subscription-enquiries', require('./routes/subscriptionEnquiries'));
+app.use('/api/catalogue-requests', require('./routes/catalogueRequests'));
 
 // Seed Route
 app.post('/api/trigger-seed', async (req, res) => {

@@ -273,4 +273,21 @@ router.get('/memberships', userAuth, async (req, res) => {
   }
 });
 
+// Get User Catalogue Requests
+router.get('/catalogues', userAuth, async (req, res) => {
+  try {
+    const CatalogueRequest = require('../models/CatalogueRequest');
+    const userEmail = (req.user.email || '').toLowerCase().trim();
+    const list = await CatalogueRequest.find({
+      $or: [
+        { userId: req.user.id },
+        { email: { $regex: new RegExp('^' + userEmail + '$', 'i') } }
+      ]
+    }).sort({ createdAt: -1 }).lean();
+    res.json(list);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
