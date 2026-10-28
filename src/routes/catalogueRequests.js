@@ -155,4 +155,17 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+
+// POST bulk delete
+router.post('/bulk-delete', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ message: 'No IDs provided' });
+    await CatalogueRequest.deleteMany({ _id: { $in: ids } });
+    res.json({ message: 'Deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

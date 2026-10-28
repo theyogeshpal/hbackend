@@ -9,7 +9,8 @@ const authMiddleware = require('../middleware/auth');
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const admin = await Admin.findOne({ email });
+    const cleanEmail = (email || '').toLowerCase().trim();
+    const admin = await Admin.findOne({ email: cleanEmail });
     if (!admin) return res.status(401).json({ message: 'Invalid credentials' });
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });

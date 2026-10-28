@@ -2,13 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const compression = require('compression');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 
 app.use(compression());
-
-const path = require('path');
 
 app.use(cors());
 app.use(express.json());
@@ -103,8 +102,15 @@ app.post('/api/trigger-seed', async (req, res) => {
 });
 
 // MongoDB connect
-mongoose.connect(process.env.MONGO_URI)
+const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/hieil';
+mongoose.connect(mongoUri)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
+});
 
 module.exports = app;
