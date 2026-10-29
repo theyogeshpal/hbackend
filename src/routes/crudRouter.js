@@ -25,7 +25,13 @@ const crudRouter = (Model) => {
 
   router.post('/', async (req, res) => {
     try {
-      const doc = await Model.create(req.body);
+      const data = { ...req.body };
+      delete data._id;
+      delete data.id;
+      delete data.__v;
+      delete data.createdAt;
+      delete data.updatedAt;
+      const doc = await Model.create(data);
       
       // Create notification for enquiry models
       const enquiryModels = ['Inquiry', 'Contact', 'ServiceInquiry', 'ProductCQ', 'BulkFmoq', 'Feedback', 'DownloadLead'];
@@ -109,7 +115,13 @@ const crudRouter = (Model) => {
 
   router.put('/:id', async (req, res) => {
     try {
-      const doc = await Model.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+      const updateData = { ...req.body };
+      delete updateData._id;
+      delete updateData.id;
+      delete updateData.__v;
+      delete updateData.createdAt;
+      delete updateData.updatedAt;
+      const doc = await Model.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
       if (!doc) return res.status(404).json({ message: 'Not found' });
       res.json(doc);
     } catch (e) { res.status(400).json({ message: e.message }); }

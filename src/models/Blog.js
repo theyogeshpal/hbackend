@@ -5,6 +5,8 @@ const schema = new mongoose.Schema({
   tag: String,
   description: String,
   image: String,
-  content: String
+  content: String,
+  author: { type: String, default: 'HIEIL' },
+  status: { type: String, default: 'ACTIVE' }
 }, { timestamps: true });
 module.exports = mongoose.model('Blog', schema);
