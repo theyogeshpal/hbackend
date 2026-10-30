@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
 // Creates standard GET all, GET one, POST, PUT, DELETE routes for a model
 const crudRouter = (Model) => {
@@ -17,6 +18,9 @@ const crudRouter = (Model) => {
 
   router.get('/:id', async (req, res) => {
     try {
+      if (!req.params.id || req.params.id === 'undefined' || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid or missing document ID' });
+      }
       const doc = await Model.findById(req.params.id).lean();
       if (!doc) return res.status(404).json({ message: 'Not found' });
       res.json(doc);
@@ -79,7 +83,6 @@ const crudRouter = (Model) => {
             link = '/admin/download-leads';
           }
           
-          
           await Notification.create({
             modelName: Model.modelName,
             title,
@@ -115,6 +118,9 @@ const crudRouter = (Model) => {
 
   router.put('/:id', async (req, res) => {
     try {
+      if (!req.params.id || req.params.id === 'undefined' || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid or missing document ID' });
+      }
       const updateData = { ...req.body };
       delete updateData._id;
       delete updateData.id;
@@ -129,6 +135,9 @@ const crudRouter = (Model) => {
 
   router.delete('/:id', async (req, res) => {
     try {
+      if (!req.params.id || req.params.id === 'undefined' || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid or missing document ID' });
+      }
       const doc = await Model.findByIdAndDelete(req.params.id);
       if (!doc) return res.status(404).json({ message: 'Not found' });
       res.json({ message: 'Deleted successfully' });
